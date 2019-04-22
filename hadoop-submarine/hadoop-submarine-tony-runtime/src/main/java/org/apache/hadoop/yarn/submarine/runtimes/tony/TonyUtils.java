@@ -47,22 +47,22 @@ public class TonyUtils {
     // Resources for PS & Worker
     if (parameters.getPsResource() != null) {
       tonyConf.setInt(
-          TonyConfigurationKeys.getVCoresKey(Constants.PS_JOB_NAME),
+          TonyConfigurationKeys.getResourceKey(Constants.PS_JOB_NAME, Constants.VCORES),
           parameters.getPsResource().getVirtualCores());
       tonyConf.setLong(
-          TonyConfigurationKeys.getMemoryKey(Constants.PS_JOB_NAME),
+          TonyConfigurationKeys.getResourceKey(Constants.PS_JOB_NAME, Constants.MEMORY),
           parameters.getPsResource().getMemorySize());
     }
     if (parameters.getWorkerResource() != null) {
       tonyConf.setInt(
-          TonyConfigurationKeys.getVCoresKey(Constants.WORKER_JOB_NAME),
+          TonyConfigurationKeys.getResourceKey(Constants.WORKER_JOB_NAME, Constants.VCORES),
           parameters.getWorkerResource().getVirtualCores());
       tonyConf.setLong(
-          TonyConfigurationKeys.getMemoryKey(Constants.WORKER_JOB_NAME),
+          TonyConfigurationKeys.getResourceKey(Constants.WORKER_JOB_NAME, Constants.MEMORY),
           parameters.getWorkerResource().getMemorySize());
       try {
         tonyConf.setLong(
-            TonyConfigurationKeys.getGPUsKey(Constants.WORKER_JOB_NAME),
+            TonyConfigurationKeys.getResourceKey(Constants.WORKER_JOB_NAME, Constants.GPUS),
             parameters.getWorkerResource()
                 .getResourceValue(ResourceInformation.GPU_URI));
       } catch (ResourceNotFoundException rnfe) {
