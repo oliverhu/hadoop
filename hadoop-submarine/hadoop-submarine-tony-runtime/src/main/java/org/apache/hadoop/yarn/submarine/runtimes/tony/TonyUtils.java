@@ -75,18 +75,22 @@ public class TonyUtils {
           parameters.getQueue());
     }
     // Set up Docker for PS & Worker
-    tonyConf.setBoolean(TonyConfigurationKeys.DOCKER_ENABLED, true);
-    tonyConf.set(TonyConfigurationKeys.getContainerDockerKey(),
-        parameters.getDockerImageName());
+    if (parameters.getDockerImageName() != null) {
+      tonyConf.set(TonyConfigurationKeys.getContainerDockerKey(),
+          parameters.getDockerImageName());
+      tonyConf.setBoolean(TonyConfigurationKeys.DOCKER_ENABLED, true);
+    }
     if (parameters.getWorkerDockerImage() != null) {
       tonyConf.set(
           TonyConfigurationKeys.getDockerImageKey(Constants.WORKER_JOB_NAME),
           parameters.getWorkerDockerImage());
+      tonyConf.setBoolean(TonyConfigurationKeys.DOCKER_ENABLED, true);
     }
     if (parameters.getPsDockerImage() != null) {
       tonyConf.set(
           TonyConfigurationKeys.getDockerImageKey(Constants.PS_JOB_NAME),
           parameters.getPsDockerImage());
+      tonyConf.setBoolean(TonyConfigurationKeys.DOCKER_ENABLED, true);
     }
 
     // Set up container environment
@@ -122,7 +126,7 @@ public class TonyUtils {
     if (parameters.getLocalizations() != null) {
       tonyConf.setStrings(TonyConfigurationKeys.getContainerResourcesKey(),
           parameters.getLocalizations().stream()
-              .map(Localization::getRemoteUri)
+              .map(lo -> lo.getRemoteUri() + Constants.RESOURCE_DIVIDER + lo.getLocalPath())
               .toArray(String[]::new));
     }
 

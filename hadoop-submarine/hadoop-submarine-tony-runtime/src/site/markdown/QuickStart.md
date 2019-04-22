@@ -18,27 +18,21 @@
 
 Must:
 
-- Apache Hadoop 2.7+.
+- Apache Hadoop 2.7 or above.
 
 Optional:
 
-- Enable GPU on YARN support(when GPU-based training is required).
-- Docker support.
+- Enable GPU on YARN support (when GPU-based training is required, Hadoop 3.1 and above).
+- Enable Docker support on Hadoop (Hadoop 2.9 and above).
 
 ## Run jobs
 
 ### Commandline options
 
 ```$xslt
-usage: job run
- -checkpoint_path <arg>       Training output directory of the job, could
-                              be local or other FS directory. This
-                              typically includes checkpoint files and
-                              exported model
+usage:
  -docker_image <arg>          Docker image name/tag
  -env <arg>                   Common environment variable of worker/ps
- -input_path <arg>            Input of the job, could be local or other FS
-                              directory
  -name <arg>                  Name of the job
  -num_ps <arg>                Number of PS tasks of the job, by default
                               it's 0
@@ -87,32 +81,17 @@ usage: job run
                               -localization "/user/yarn/mydir3:/opt/mydir3"
                               -localization "./mydir1:."
  -insecure                    Whether running in an insecure cluster
-```
-
-#### Notes:
-When using `localization` option to make a collection of dependency Python 
-scripts available to entry python script in the container, you may also need to
- set `PYTHONPATH` environment variable as below to avoid module import error 
-reported from `entry_script.py`.
-
-```
-... job run
-  # the entry point
-  --localization entry_script.py:<path>/entry_script.py
-  # the dependency Python scripts of the entry point
-  --localization other_scripts_dir:<path>/other_scripts_dir
-  # the PYTHONPATH env to make dependency available to entry script
-  --env PYTHONPATH="<path>/other_scripts_dir"
-  --worker_launch_cmd "python <path>/entry_script.py ..."
+ -conf                        Override configurations via commandline
 ```
 
 ### Submarine Configuration
 
 For submarine internal configuration, please create a `submarine.xml` which should be placed under `$HADOOP_CONF_DIR`.
+Make sure you set `submarine.runtime.class` to `org.apache.hadoop.yarn.submarine.runtimes.tony.TonyRuntimeFactory`
 
 |Configuration Name | Description |
 |:---- |:---- |
-| `submarine.runtime.class` | Optional. Full qualified class name for your runtime factory. |
+| `submarine.runtime.class` | org.apache.hadoop.yarn.submarine.runtimes.tony.TonyRuntimeFactory
 | `submarine.localization.max-allowed-file-size-mb` | Optional. This sets a size limit to the file/directory to be localized in "-localization" CLI option. 2GB by default. |
 
 
@@ -130,7 +109,6 @@ CLASSPATH=$(hadoop classpath --glob): \
 /home/pi/hadoop/TonY/tony-cli/build/libs/tony-cli-0.3.0-all.jar \
 
 java org.apache.hadoop.yarn.submarine.client.cli.Cli job run --name tf-job-001 \
- --docker_image hadoopsubmarine/tf-1.8.0-cpu:0.0.3 \
  --input_path hdfs://pi-aw:9000/dataset/cifar-10-data \
  --worker_resources memory=3G,vcores=2 \
  --worker_launch_cmd "export CLASSPATH=\$(/hadoop-3.1.0/bin/hadoop classpath --glob) && cd /test/models/tutorials/image/cifar10_estimator && python cifar10_main.py --data-dir=%input_path% --job-dir=%checkpoint_path% --train-steps=10000 --eval-batch-size=16 --train-batch-size=16 --variable-strategy=CPU --num-gpus=0 --sync" \
@@ -166,6 +144,3 @@ java org.apache.hadoop.yarn.submarine.client.cli.Cli job run --name tf-job-001 \
  --env HADOOP_HDFS_HOME=/hadoop-3.1.0 \
  --env HADOOP_CONF_DIR=/hadoop-3.1.0/etc/hadoop
 ```
-
-
-#### Notes:
